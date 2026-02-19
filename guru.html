@@ -180,9 +180,11 @@ async function renderVideos(){
 
 async function getVideos(kelas){
   try{
-    const snap=await getDocs(query(collection(db,'videos'),where('kelas','==',kelas),orderBy('order')));
-    return snap.docs.map(d=>({id:d.id,...d.data()}));
-  }catch(e){return [];}
+    const snap=await getDocs(query(collection(db,'videos'),where('kelas','==',kelas)));
+    const vids=snap.docs.map(d=>({id:d.id,...d.data()}));
+    vids.sort((a,b)=>(a.order||0)-(b.order||0));
+    return vids;
+  }catch(e){console.error('getVideos error:',e);return [];}
 }
 
 window.deleteVideo = async (id, kelas) => {
@@ -341,8 +343,9 @@ window.saveManual = async () => {
 async function renderStudents(){
   document.getElementById('content').innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);">Memuat data siswa...</div>';
   try{
-    const snap=await getDocs(query(collection(db,'users'),where('role','==','siswa'),orderBy('points','desc')));
+    const snap=await getDocs(query(collection(db,'users'),where('role','==','siswa')));
     const all=snap.docs.map(d=>({uid:d.id,...d.data()}));
+    all.sort((a,b)=>(b.points||0)-(a.points||0));
     const s6A=all.filter(u=>u.kelas==='6A'), s6B=all.filter(u=>u.kelas==='6B');
     const makeTable=(students,cls)=>students.length?students.map((u,i)=>`
       <div class="vitem">
