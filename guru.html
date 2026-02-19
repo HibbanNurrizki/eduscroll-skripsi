@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduScroll — Dashboard Guru</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{--bg:#080c14;--surface:#111827;--surface2:#1a2438;--accent:#e94560;--green:#00d4aa;--gold:#f5a623;--text:#f0f4ff;--muted:#6b7a99;--pai:#00d4aa;--pkn:#e94560;--t:0.25s cubic-bezier(0.4,0,0.2,1);}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+  .loader-full{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:16px;}
+  .loader{width:48px;height:48px;border:3px solid rgba(255,255,255,.1);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loader-text{font-size:14px;color:var(--muted);}
+  #app{display:none;max-width:700px;margin:0 auto;padding-bottom:60px;}
+
+  /* HEADER */
+  .hdr{background:linear-gradient(135deg,var(--surface),#0f2040);padding:28px 24px 20px;border-bottom:1px solid rgba(255,255,255,.07);position:sticky;top:0;z-index:50;}
+  .hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  .hdr-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;}
+  .hdr-sub{font-size:13px;color:var(--muted);margin-top:2px;}
+  .btn-out{background:rgba(233,69,96,.12);border:1px solid rgba(233,69,96,.25);border-radius:10px;color:var(--accent);padding:8px 16px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;}
+
+  /* TABS */
+  .tabs{display:flex;background:rgba(255,255,255,.04);border-radius:12px;padding:4px;gap:3px;overflow-x:auto;}
+  .tab{flex:1;min-width:72px;padding:10px 6px;text-align:center;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;color:var(--muted);transition:all var(--t);background:transparent;border:none;font-family:inherit;white-space:nowrap;}
+  .tab.active{background:var(--accent);color:#fff;}
+
+  /* CONTENT */
+  .content{padding:20px;}
+  .card{background:var(--surface);border-radius:16px;padding:20px;border:1px solid rgba(255,255,255,.07);margin-bottom:16px;}
+  .ctitle{font-size:15px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .fg{margin-bottom:14px;}
+  .fl{font-size:12px;color:var(--muted);margin-bottom:7px;display:block;font-weight:600;}
+  .fi{width:100%;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.09);border-radius:11px;padding:12px 14px;color:var(--text);font-family:inherit;font-size:14px;outline:none;transition:border-color var(--t);}
+  .fi:focus{border-color:var(--accent);}
+  .fi option{background:#111827;}
+  .frow{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .btn-green{background:linear-gradient(135deg,var(--green),#009977);border:none;border-radius:11px;padding:13px 20px;color:#fff;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;width:100%;margin-top:10px;transition:all var(--t);}
+  .btn-green:hover{transform:translateY(-2px);}
+  .btn-red{background:rgba(233,69,96,.12);border:1px solid rgba(233,69,96,.25);border-radius:8px;color:var(--accent);padding:7px 12px;font-size:13px;cursor:pointer;flex-shrink:0;}
+
+  /* VIDEO LIST */
+  .vitem{background:var(--surface);border-radius:13px;padding:15px;margin-bottom:10px;border:1px solid rgba(255,255,255,.07);display:flex;gap:13px;align-items:flex-start;}
+  .vthumb{width:70px;height:48px;border-radius:8px;background:var(--surface2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;}
+  .vinfo{flex:1;}
+  .vtitle{font-size:13px;font-weight:700;margin-bottom:4px;}
+  .vmeta{font-size:11px;color:var(--muted);display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+  .vbadge{padding:2px 8px;border-radius:20px;font-size:10px;font-weight:800;}
+  .bp{background:rgba(0,212,170,.15);color:var(--pai);}
+  .bk{background:rgba(233,69,96,.15);color:var(--pkn);}
+
+  /* STATS */
+  .sgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+  .scard{background:var(--surface);border-radius:14px;padding:18px;border:1px solid rgba(255,255,255,.07);}
+  .sval{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--gold);}
+  .slbl{font-size:12px;color:var(--muted);margin-top:4px;font-weight:700;}
+
+  /* UPLOAD */
+  .upload-zone{border:2px dashed rgba(0,212,170,.35);border-radius:14px;padding:36px 24px;text-align:center;cursor:pointer;transition:all var(--t);background:rgba(0,212,170,.03);}
+  .upload-zone:hover,.upload-zone.drag{border-color:var(--green);background:rgba(0,212,170,.08);}
+  .uicon{font-size:44px;margin-bottom:10px;display:block;}
+  .utitle{font-size:16px;font-weight:800;margin-bottom:5px;}
+  .usub{font-size:13px;color:var(--muted);line-height:1.6;}
+  .ubar{height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;margin:12px 0 6px;}
+  .ubarfill{height:100%;background:linear-gradient(90deg,var(--green),var(--gold));width:0%;transition:width .3s;border-radius:3px;}
+  .ustatus{font-size:13px;color:var(--muted);text-align:center;}
+  .preview-wrap{overflow-x:auto;border-radius:10px;border:1px solid rgba(255,255,255,.07);margin-top:14px;}
+  .ptable{width:100%;border-collapse:collapse;font-size:12px;}
+  .ptable th{background:var(--surface2);padding:10px 12px;text-align:left;color:var(--muted);font-weight:700;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.07);}
+  .ptable td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--text);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .btn-save-pai{background:linear-gradient(135deg,var(--green),#009977);border:none;border-radius:11px;padding:13px;color:#fff;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;flex:1;transition:all var(--t);}
+  .btn-save-pkn{background:linear-gradient(135deg,var(--accent),#b02040);border:none;border-radius:11px;padding:13px;color:#fff;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;flex:1;transition:all var(--t);}
+
+  .info-box{background:rgba(0,212,170,.06);border:1px solid rgba(0,212,170,.2);border-radius:12px;padding:14px 16px;font-size:13px;color:var(--muted);line-height:1.7;margin-top:16px;}
+  .info-box strong{color:var(--text);}
+
+  .toast{position:fixed;top:24px;left:50%;transform:translateX(-50%) translateY(-90px);background:var(--surface2);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:13px 24px;font-size:14px;font-weight:700;color:#fff;z-index:1000;transition:transform .4s cubic-bezier(0.34,1.56,0.64,1);white-space:nowrap;box-shadow:0 8px 36px rgba(0,0,0,.5);}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  ::-webkit-scrollbar{width:3px;}
+  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:2px;}
+</style>
+</head>
+<body>
+<div class="loader-full" id="loading"><div class="loader"></div><div class="loader-text">Memuat dashboard...</div></div>
+<div id="app">
+  <div class="hdr">
+    <div class="hdr-top">
+      <div><div class="hdr-title">👨‍🏫 Dashboard Guru</div><div class="hdr-sub" id="hdrSub">EduScroll</div></div>
+      <button class="btn-out" onclick="doLogout()">🚪 Keluar</button>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('videos')" id="tVideos">📹 Video</button>
+      <button class="tab" onclick="switchTab('upload')" id="tUpload">📤 Upload Excel</button>
+      <button class="tab" onclick="switchTab('add')" id="tAdd">➕ Manual</button>
+      <button class="tab" onclick="switchTab('students')" id="tStudents">👥 Siswa</button>
+      <button class="tab" onclick="switchTab('stats')" id="tStats">📊 Statistik</button>
+    </div>
+  </div>
+  <div class="content" id="content"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, query, where, getDocs, orderBy, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyABivTaZ_YIfjqFCdX1Ry3vfuHBjiIhjGQ",
+  authDomain: "eduscroll-skripsi.firebaseapp.com",
+  projectId: "eduscroll-skripsi",
+  storageBucket: "eduscroll-skripsi.firebasestorage.app",
+  messagingSenderId: "642802540998",
+  appId: "1:642802540998:web:53c12f951411412209d2c7"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const auth = getAuth(fbApp);
+const db = getFirestore(fbApp);
+
+let currentGuru = null, currentTab = 'videos', uploadedData = null;
+
+const showToast = msg => { const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000); };
+
+onAuthStateChanged(auth, async user => {
+  if (!user) { window.location.href='index.html'; return; }
+  const ud = await getDoc(doc(db,'users',user.uid));
+  if (!ud.exists() || ud.data().role !== 'guru') { window.location.href='index.html'; return; }
+  currentGuru = {uid:user.uid,...ud.data()};
+  document.getElementById('hdrSub').textContent = `Selamat datang, ${currentGuru.name}!`;
+  document.getElementById('loading').style.display='none';
+  document.getElementById('app').style.display='block';
+  renderTab();
+});
+
+window.switchTab = tab => {
+  currentTab=tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  const map={videos:'tVideos',upload:'tUpload',add:'tAdd',students:'tStudents',stats:'tStats'};
+  document.getElementById(map[tab]).classList.add('active');
+  renderTab();
+};
+
+function renderTab(){
+  if(currentTab==='videos') renderVideos();
+  else if(currentTab==='upload') renderUpload();
+  else if(currentTab==='add') renderAdd();
+  else if(currentTab==='students') renderStudents();
+  else renderStats();
+}
+
+// ── VIDEO LIST ──
+async function renderVideos(){
+  document.getElementById('content').innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);">Memuat video...</div>';
+  const v6A=await getVideos('6A'), v6B=await getVideos('6B');
+  let html=`
+    <div class="card">
+      <div class="ctitle">🕌 Kelas 6A — PAI (${v6A.length} video)</div>
+      ${v6A.length?v6A.map((v,i)=>`<div class="vitem">
+        <div class="vthumb">🎬</div>
+        <div class="vinfo"><div class="vtitle">${i+1}. ${v.title}</div>
+        <div class="vmeta"><span class="vbadge bp">${v.dimension}</span><span>▶ ${v.youtubeId}</span></div></div>
+        <button class="btn-red" onclick="deleteVideo('${v.id}','6A')">🗑</button>
+      </div>`).join(''):'<div style="color:var(--muted);font-size:13px;padding:8px 0;">Belum ada video. Tambah via Upload Excel atau Manual.</div>'}
+    </div>
+    <div class="card">
+      <div class="ctitle">🇮🇩 Kelas 6B — PKN (${v6B.length} video)</div>
+      ${v6B.length?v6B.map((v,i)=>`<div class="vitem">
+        <div class="vthumb">🎬</div>
+        <div class="vinfo"><div class="vtitle">${i+1}. ${v.title}</div>
+        <div class="vmeta"><span class="vbadge bk">${v.dimension}</span><span>▶ ${v.youtubeId}</span></div></div>
+        <button class="btn-red" onclick="deleteVideo('${v.id}','6B')">🗑</button>
+      </div>`).join(''):'<div style="color:var(--muted);font-size:13px;padding:8px 0;">Belum ada video. Tambah via Upload Excel atau Manual.</div>'}
+    </div>`;
+  document.getElementById('content').innerHTML=html;
+}
+
+async function getVideos(kelas){
+  try{
+    const snap=await getDocs(query(collection(db,'videos'),where('kelas','==',kelas),orderBy('order')));
+    return snap.docs.map(d=>({id:d.id,...d.data()}));
+  }catch(e){return [];}
+}
+
+window.deleteVideo = async (id, kelas) => {
+  if(!confirm('Hapus video ini?')) return;
+  await deleteDoc(doc(db,'videos',id));
+  showToast('🗑️ Video dihapus');
+  renderVideos();
+};
+
+// ── UPLOAD EXCEL ──
+function renderUpload(){
+  document.getElementById('content').innerHTML=`
+    <div class="card">
+      <div class="ctitle">📤 Upload Data Video dari Excel</div>
+      <div class="upload-zone" id="uzone" onclick="document.getElementById('xlsxIn').click()"
+        ondragover="event.preventDefault();this.classList.add('drag')"
+        ondragleave="this.classList.remove('drag')"
+        ondrop="handleDrop(event)">
+        <span class="uicon">📊</span>
+        <div class="utitle">Klik atau drag file Excel ke sini</div>
+        <div class="usub">Format .xlsx · Gunakan template EduScroll<br>Maks. 100 video per upload</div>
+      </div>
+      <input type="file" id="xlsxIn" style="display:none" accept=".xlsx,.xls" onchange="handleFile(event)">
+      <div id="uprogWrap" style="display:none;margin-top:12px;">
+        <div class="ubar"><div class="ubarfill" id="ubarfill"></div></div>
+        <div class="ustatus" id="ustatus">Membaca...</div>
+      </div>
+      <div class="info-box">
+        💡 <strong>Cara ambil YouTube ID:</strong><br>
+        Buka video YouTube → lihat URL: youtube.com/watch?v=<strong>ID_INI</strong><br>
+        Salin hanya bagian <strong>ID_INI</strong> (11 karakter) ke kolom YOUTUBE_ID di Excel
+      </div>
+    </div>
+    <div id="previewCard" style="display:none;">
+      <div class="card">
+        <div class="ctitle" id="previewTitle">👁 Preview Data</div>
+        <div id="previewWrap"></div>
+        <div style="display:flex;gap:10px;margin-top:16px;">
+          <button class="btn-save-pai" onclick="saveUpload('6A')">✅ Simpan ke 6A (PAI)</button>
+          <button class="btn-save-pkn" onclick="saveUpload('6B')">✅ Simpan ke 6B (PKN)</button>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:10px;text-align:center;">⚠️ Video lama di kelas tersebut akan tetap ada, video baru ditambahkan</div>
+      </div>
+    </div>`;
+}
+
+window.handleDrop = e => {
+  e.preventDefault();
+  document.getElementById('uzone').classList.remove('drag');
+  if(e.dataTransfer.files[0]) processXlsx(e.dataTransfer.files[0]);
+};
+window.handleFile = e => { if(e.target.files[0]) processXlsx(e.target.files[0]); };
+
+function processXlsx(file){
+  const prog=document.getElementById('uprogWrap');
+  const bar=document.getElementById('ubarfill');
+  const status=document.getElementById('ustatus');
+  prog.style.display='block'; bar.style.width='20%'; status.textContent='Membaca file...';
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      bar.style.width='60%'; status.textContent='Memproses...';
+      const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+      const sheetName=wb.SheetNames.find(n=>n==='PAI_6A'||n==='PKN_6B')||wb.SheetNames[0];
+      const rows=XLSX.utils.sheet_to_json(wb.Sheets[sheetName],{header:1});
+      let hi=-1;
+      for(let i=0;i<rows.length;i++){if(rows[i]&&rows[i][0]==='NO'){hi=i;break;}}
+      if(hi===-1){showToast('❌ Format tidak dikenal. Gunakan template!');prog.style.display='none';return;}
+      const dataRows=rows.slice(hi+1).filter(r=>r[1]&&r[4]);
+      const mapJ={'A':0,'B':1,'C':2,'D':3};
+      uploadedData=dataRows.slice(0,100).map((r,i)=>({
+        title:String(r[1]||''), desc:String(r[2]||''), dimension:String(r[3]||''),
+        youtubeId:String(r[4]||'').trim(),
+        quiz:{question:String(r[5]||''),options:[String(r[6]||''),String(r[7]||''),String(r[8]||''),String(r[9]||'')],correct:mapJ[String(r[10]||'A').toUpperCase().trim()]||0,explanation:String(r[11]||'')}
+      }));
+      bar.style.width='100%'; status.textContent=`✅ ${uploadedData.length} video siap diupload`;
+      document.getElementById('previewTitle').textContent=`👁 Preview: ${uploadedData.length} video dari "${sheetName}"`;
+      const prev=uploadedData.slice(0,5);
+      document.getElementById('previewWrap').innerHTML=`<div class="preview-wrap"><table class="ptable">
+        <tr><th>#</th><th>Judul Video</th><th>Dimensi</th><th>YouTube ID</th><th>Ada Kuis?</th></tr>
+        ${prev.map((v,i)=>`<tr><td>${i+1}</td><td title="${v.title}">${v.title}</td><td>${v.dimension}</td><td><code style="color:var(--gold)">${v.youtubeId}</code></td><td>${v.quiz.question?'✅':'❌'}</td></tr>`).join('')}
+      </table></div>${uploadedData.length>5?`<div style="text-align:center;color:var(--muted);font-size:12px;padding:8px">...dan ${uploadedData.length-5} video lainnya</div>`:''}`;
+      document.getElementById('previewCard').style.display='block';
+    }catch(err){status.textContent='❌ Error: '+err.message;showToast('❌ Gagal membaca file');}
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+window.saveUpload = async kelas => {
+  if(!uploadedData?.length){showToast('Tidak ada data');return;}
+  showToast('⏳ Menyimpan...');
+  try{
+    // Get current max order
+    const existing=await getVideos(kelas);
+    let order=existing.length;
+    const batch=writeBatch(db);
+    uploadedData.forEach(v=>{
+      const ref=doc(collection(db,'videos'));
+      batch.set(ref,{...v,kelas,order:order++,createdAt:new Date().toISOString(),addedBy:currentGuru.uid});
+    });
+    await batch.commit();
+    showToast(`✅ ${uploadedData.length} video berhasil disimpan ke Kelas ${kelas}!`);
+    uploadedData=null;
+    document.getElementById('previewCard').style.display='none';
+    setTimeout(()=>switchTab('videos'),800);
+  }catch(e){showToast('❌ Gagal simpan: '+e.message);}
+};
+
+// ── ADD MANUAL ──
+function renderAdd(){
+  document.getElementById('content').innerHTML=`
+    <div class="card">
+      <div class="ctitle">➕ Tambah Video Manual</div>
+      <div class="frow">
+        <div class="fg"><label class="fl">Kelas</label><select class="fi" id="nKelas"><option value="6A">6A — PAI</option><option value="6B">6B — PKN</option></select></div>
+        <div class="fg"><label class="fl">Dimensi/Topik</label><input class="fi" id="nDim" type="text" placeholder="misal: Adab Komunikasi"></div>
+      </div>
+      <div class="fg"><label class="fl">Judul Video</label><input class="fi" id="nTitle" type="text" placeholder="Judul video..."></div>
+      <div class="fg"><label class="fl">Deskripsi Singkat</label><input class="fi" id="nDesc" type="text" placeholder="Deskripsi untuk siswa..."></div>
+      <div class="fg">
+        <label class="fl">YouTube Video ID</label>
+        <input class="fi" id="nYt" type="text" placeholder="Contoh: dQw4w9WgXcQ">
+        <div style="font-size:11px;color:var(--muted);margin-top:6px;">💡 Dari URL: youtube.com/watch?v=<strong>ID_INI</strong></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ctitle">🧩 Kuis untuk Video Ini</div>
+      <div class="fg"><label class="fl">Pertanyaan Kuis</label><input class="fi" id="nQ" type="text" placeholder="Tulis pertanyaan..."></div>
+      ${[0,1,2,3].map(i=>`<div class="fg"><label class="fl">Pilihan ${['A','B','C','D'][i]}</label><input class="fi" id="nO${i}" type="text" placeholder="Pilihan ${['A','B','C','D'][i]}..."></div>`).join('')}
+      <div class="fg"><label class="fl">Jawaban Benar</label><select class="fi" id="nAns">${[0,1,2,3].map(i=>`<option value="${i}">${['A','B','C','D'][i]}</option>`).join('')}</select></div>
+      <div class="fg"><label class="fl">Penjelasan Jawaban</label><input class="fi" id="nExp" type="text" placeholder="Kenapa jawaban itu benar?"></div>
+      <button class="btn-green" onclick="saveManual()">✅ Simpan Video</button>
+    </div>`;
+}
+
+window.saveManual = async () => {
+  const kelas=document.getElementById('nKelas').value;
+  const title=document.getElementById('nTitle').value.trim();
+  const desc=document.getElementById('nDesc').value.trim();
+  const dim=document.getElementById('nDim').value.trim();
+  const yt=document.getElementById('nYt').value.trim();
+  const q=document.getElementById('nQ').value.trim();
+  const opts=[0,1,2,3].map(i=>document.getElementById('nO'+i).value.trim());
+  const ans=parseInt(document.getElementById('nAns').value);
+  const exp=document.getElementById('nExp').value.trim();
+  if(!title||!yt||!q||opts.some(o=>!o)){showToast('❗ Lengkapi semua field!');return;}
+  try{
+    const existing=await getVideos(kelas);
+    await setDoc(doc(collection(db,'videos')),{title,desc,dimension:dim,youtubeId:yt,kelas,order:existing.length,quiz:{question:q,options:opts,correct:ans,explanation:exp},createdAt:new Date().toISOString(),addedBy:currentGuru.uid});
+    showToast('✅ Video berhasil ditambahkan!');
+    switchTab('videos');
+  }catch(e){showToast('❌ Gagal: '+e.message);}
+};
+
+// ── STUDENTS ──
+async function renderStudents(){
+  document.getElementById('content').innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);">Memuat data siswa...</div>';
+  try{
+    const snap=await getDocs(query(collection(db,'users'),where('role','==','siswa'),orderBy('points','desc')));
+    const all=snap.docs.map(d=>({uid:d.id,...d.data()}));
+    const s6A=all.filter(u=>u.kelas==='6A'), s6B=all.filter(u=>u.kelas==='6B');
+    const makeTable=(students,cls)=>students.length?students.map((u,i)=>`
+      <div class="vitem">
+        <div class="vthumb" style="font-size:24px">${u.emoji||'😊'}</div>
+        <div class="vinfo">
+          <div class="vtitle">${i+1}. ${u.name}</div>
+          <div class="vmeta"><span>${u.email}</span><span>📹 ${(u.completedVideos||[]).length} video</span><span>⭐ ${u.points||0} poin</span></div>
+        </div>
+      </div>`).join(''):`<div style="color:var(--muted);font-size:13px;padding:8px 0;">Belum ada siswa terdaftar di kelas ${cls}.</div>`;
+    document.getElementById('content').innerHTML=`
+      <div class="card"><div class="ctitle">🕌 Kelas 6A — PAI (${s6A.length} siswa)</div>${makeTable(s6A,'6A')}</div>
+      <div class="card"><div class="ctitle">🇮🇩 Kelas 6B — PKN (${s6B.length} siswa)</div>${makeTable(s6B,'6B')}</div>`;
+  }catch(e){document.getElementById('content').innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);">Gagal memuat data.</div>';}
+}
+
+// ── STATS ──
+async function renderStats(){
+  document.getElementById('content').innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);">Memuat statistik...</div>';
+  const [v6A,v6B,stuSnap]=await Promise.all([getVideos('6A'),getVideos('6B'),getDocs(query(collection(db,'users'),where('role','==','siswa')))]);
+  const students=stuSnap.docs.map(d=>d.data());
+  const s6A=students.filter(u=>u.kelas==='6A'), s6B=students.filter(u=>u.kelas==='6B');
+  const totalPts=students.reduce((a,u)=>a+(u.points||0),0);
+  const totalDone=students.reduce((a,u)=>a+(u.completedVideos||[]).length,0);
+  document.getElementById('content').innerHTML=`
+    <div class="sgrid">
+      <div class="scard"><div class="sval">${v6A.length}</div><div class="slbl">Video 6A (PAI)</div></div>
+      <div class="scard"><div class="sval">${v6B.length}</div><div class="slbl">Video 6B (PKN)</div></div>
+      <div class="scard"><div class="sval">${s6A.length}</div><div class="slbl">Siswa Kelas 6A</div></div>
+      <div class="scard"><div class="sval">${s6B.length}</div><div class="slbl">Siswa Kelas 6B</div></div>
+      <div class="scard"><div class="sval">${totalPts}</div><div class="slbl">Total Poin Terkumpul</div></div>
+      <div class="scard"><div class="sval">${totalDone}</div><div class="slbl">Total Kuis Dikerjakan</div></div>
+    </div>
+    <div class="card">
+      <div class="ctitle">📋 Dimensi PAI yang Tercakup</div>
+      ${['Adab Komunikasi Online','Kejujuran Digital (Anti-Hoaks)','Menjaga Aurat Digital','Menghindari Ghibah Digital','Amanah Data Pribadi'].map(d=>`<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px;color:var(--muted);">🕌 ${d}</div>`).join('')}
+    </div>
+    <div class="card">
+      <div class="ctitle">📋 Topik PKN yang Tercakup</div>
+      ${['Hak & Kewajiban Digital','Pancasila & Kehidupan Digital','Demokrasi Digital','Kebhinekaan Digital','Kewargaan Digital'].map(d=>`<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px;color:var(--muted);">🇮🇩 ${d}</div>`).join('')}
+    </div>`;
+}
+
+window.doLogout = async () => { await signOut(auth); window.location.href='index.html'; };
+</script>
+</body>
+</html>
