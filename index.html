@@ -308,9 +308,14 @@ window.doRegister = async () => {
 
 async function loadVideos(kelas) {
   try {
-    const snap=await getDocs(query(collection(db,'videos'),where('kelas','==',kelas),orderBy('order')));
-    if(!snap.empty) return snap.docs.map(d=>({id:d.id,...d.data()}));
-  } catch(e){}
+    const snap=await getDocs(query(collection(db,'videos'),where('kelas','==',kelas)));
+    if(!snap.empty) {
+      const vids = snap.docs.map(d=>({id:d.id,...d.data()}));
+      // Sort by order field client-side, no index needed
+      vids.sort((a,b)=>(a.order||0)-(b.order||0));
+      return vids;
+    }
+  } catch(e){ console.error('loadVideos error:',e); }
   return [];
 }
 
@@ -364,16 +369,19 @@ window.switchLB = cls => {
 async function renderLB(){
   document.getElementById('lbList').innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);">Memuat...</div>';
   try{
-    const snap=await getDocs(query(collection(db,'users'),where('kelas','==',currentLBClass),where('role','==','siswa'),orderBy('points','desc'),limit(20)));
+    const snap=await getDocs(query(collection(db,'users'),where('kelas','==',currentLBClass),where('role','==','siswa')));
     if(snap.empty){document.getElementById('lbList').innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);">Belum ada siswa terdaftar.</div>';return;}
+    const users=snap.docs.map(d=>({uid:d.id,...d.data()}));
+    users.sort((a,b)=>(b.points||0)-(a.points||0));
+    const top20=users.slice(0,20);
     const medals=['🥇','🥈','🥉'];
-    let html=snap.docs.map((d,i)=>{
-      const u={uid:d.id,...d.data()};
+    let html=top20.map((u,i)=>{
       const me=u.uid===currentUser?.uid;
       return `<div class="lbrow ${me?'me':''}"><div class="lbrank">${medals[i]||i+1}</div><div class="lbav">${u.emoji||'😊'}</div><div class="lbinfo"><div class="lbname">${me?'⭐ '+u.name+' (Kamu)':u.name}</div><div class="lbmeta">${(u.completedVideos||[]).length} video selesai</div></div><div class="lbpts">${u.points||0}</div></div>`;
     }).join('');
     document.getElementById('lbList').innerHTML=html;
   }catch(e){document.getElementById('lbList').innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);">Gagal memuat. Coba lagi.</div>';}
+}
 }
 
 function renderProfile(){
