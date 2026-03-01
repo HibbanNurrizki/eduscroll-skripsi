@@ -167,7 +167,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
     <div class="fg" id="kelasGrp"><label class="fl">Kelas</label>
       <select class="fi" id="inKelas">
         <option value="6A">6A — PAI (Akhlak Digital)</option>
-        <option value="6B">6B — PKN (Kewargaan Digital)</option>
+        <option value="6B">6B — PKN (Toleransi Keberagaman)</option>
       </select>
     </div>
     <div class="fg"><label class="fl">Password</label><input class="fi" id="inPass" type="password" placeholder="Min. 6 karakter"></div>
@@ -227,7 +227,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
       <div class="rt" id="rt"></div>
       <div class="rp" id="rp"></div>
       <div class="rx" id="rx"></div>
-      <button class="bcont" onclick="closeQ()">Lanjut Nonton ▶</button>
+      <button class="bcont" onclick="closeQ(true)">Lanjut Nonton ▶</button>
     </div>
   </div>
 </div>
@@ -356,7 +356,7 @@ function renderFeed() {
   }
   const done = CU.completedVideos || [];
   const badge = CU.kelas === '6A' ? 'bp' : 'bk';
-  const icon = CU.kelas === '6A' ? '🕌' : '🇮🇩';
+  const icon = CU.kelas === '6A' ? '🕌' : '🤝';
   videos.forEach((v, i) => {
     const s = document.createElement('div');
     s.className = 'vs';
@@ -464,7 +464,7 @@ function renderProf() {
   document.getElementById('profScreen').innerHTML =
     '<div class="ph"><div class="pav">' + (CU.emoji || '😊') + '</div>'
     + '<div class="pnm">' + CU.name + '</div>'
-    + '<div class="pkl">Kelas ' + CU.kelas + ' — ' + (CU.kelas === '6A' ? '🕌 PAI' : '🇮🇩 PKN') + '</div></div>'
+    + '<div class="pkl">Kelas ' + CU.kelas + ' — ' + (CU.kelas === '6A' ? '🕌 PAI Akhlak Digital' : '🤝 PKN Toleransi Keberagaman') + '</div></div>'
     + '<div class="sg">'
     + '<div class="sc"><div class="sv">' + pts + '</div><div class="sl">Total Poin</div></div>'
     + '<div class="sc"><div class="sv">' + done + '</div><div class="sl">Video Selesai</div></div>'
@@ -519,8 +519,9 @@ window.ansQ = async (vi, chosen) => {
   }, 800);
 };
 
-window.closeQ = () => {
+window.closeQ = (answered) => {
   document.getElementById('qm').classList.remove('on');
+  if (answered && idx < videos.length - 1) { idx++; }
   renderFeed();
   goTo(idx);
 };
