@@ -204,25 +204,22 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 </div>
 
 <div id="mainApp" class="screen">
-  <div id="feed">
-    <div class="vbar"><div class="vbf" id="vbf" style="width:0%"></div></div>
-    <div class="vc" id="vc"></div>
-    <div class="vcnt" id="vcnt"></div>
-    <div class="vact">
-      <div class="ab" onclick="toast('❤️ Disukai!')"><div class="ai">❤️</div><div class="al">Suka</div></div>
-      <div class="ab" onclick="toast('🔖 Disimpan!')"><div class="ai">🔖</div><div class="al">Simpan</div></div>
-      <div class="ab" onclick="stab('info')"><div class="ai">📋</div><div class="al">Info</div></div>
-    </div>
-    <div class="nav">
-      <div class="ni on" id="nHome" onclick="stab('home')"><div class="nicon">🏠</div><div>Beranda</div></div>
-      <div class="ni" id="nLb" onclick="stab('lb')"><div class="nicon">🏆</div><div>Peringkat</div></div>
-      <div class="ni" id="nInfo" onclick="stab('info')"><div class="nicon">📚</div><div>Materi</div></div>
-      <div class="ni" id="nProf" onclick="stab('prof')"><div class="nicon">👤</div><div>Profil</div></div>
+
+  <!-- TAB: BERANDA -->
+  <div id="feedWrap" style="position:absolute;inset:0;">
+    <div id="feed">
+      <div class="vbar"><div class="vbf" id="vbf" style="width:0%"></div></div>
+      <div class="vc" id="vc"></div>
+      <div class="vcnt" id="vcnt"></div>
+      <div class="vact">
+        <div class="ab" onclick="toast('❤️ Disukai!')"><div class="ai">❤️</div><div class="al">Suka</div></div>
+        <div class="ab" onclick="toast('🔖 Disimpan!')"><div class="ai">🔖</div><div class="al">Simpan</div></div>
+      </div>
     </div>
   </div>
 
-  <!-- LEADERBOARD -->
-  <div id="lbScreen" class="oscreen" style="padding-bottom:75px;">
+  <!-- TAB: LEADERBOARD -->
+  <div id="lbScreen" class="oscreen" style="display:none;padding-bottom:75px;">
     <div class="oshdr">
       <div class="oshtit">🏆 Papan Peringkat</div>
       <div class="oshsub">Siapa raja EduScroll minggu ini?</div>
@@ -235,7 +232,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
   </div>
 
   <!-- INFO / MATERI -->
-  <div id="infoScreen" class="oscreen" style="padding-bottom:75px;">
+  <div id="infoScreen" class="oscreen" style="display:none;padding-bottom:75px;">
     <div class="oshdr">
       <div class="oshtit">📚 Informasi Pembelajaran</div>
       <div class="oshsub">CP, TP, Materi & Panduan EduScroll</div>
@@ -243,8 +240,17 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
     <div class="oscroll" id="infoContent"></div>
   </div>
 
-  <!-- PROFIL -->
-  <div id="profScreen" class="oscreen" style="padding-bottom:75px;overflow-y:auto;"></div>
+  <!-- TAB: PROFIL -->
+  <div id="profScreen" class="oscreen" style="display:none;padding-bottom:75px;overflow-y:auto;"></div>
+
+  <!-- NAVBAR GLOBAL -->
+  <div class="nav">
+    <div class="ni on" id="nHome" onclick="stab('home')"><div class="nicon">🏠</div><div>Beranda</div></div>
+    <div class="ni" id="nLb" onclick="stab('lb')"><div class="nicon">🏆</div><div>Peringkat</div></div>
+    <div class="ni" id="nInfo" onclick="stab('info')"><div class="nicon">📚</div><div>Materi</div></div>
+    <div class="ni" id="nProf" onclick="stab('prof')"><div class="nicon">👤</div><div>Profil</div></div>
+  </div>
+
 </div>
 
 </div>
@@ -444,37 +450,18 @@ function prv() {
 }
 
 window.stab = tab => {
-  // Reset nav icons
+  // Sembunyikan semua tab content
+  document.getElementById('feedWrap').style.display = tab === 'home' ? 'block' : 'none';
+  document.getElementById('lbScreen').style.display = tab === 'lb' ? 'flex' : 'none';
+  document.getElementById('infoScreen').style.display = tab === 'info' ? 'flex' : 'none';
+  document.getElementById('profScreen').style.display = tab === 'prof' ? 'flex' : 'none';
+  // Update nav aktif
   ['nHome','nLb','nInfo','nProf'].forEach(id => document.getElementById(id).classList.remove('on'));
-  // Tutup semua overlay
-  ['lbScreen','infoScreen','profScreen'].forEach(id => {
-    const el = document.getElementById(id);
-    el.classList.remove('active');
-    el.style.display = 'none';
-  });
-  document.getElementById('nHome').classList.add('on');
-  if (tab === 'lb') {
-    const el = document.getElementById('lbScreen');
-    el.style.display = 'flex';
-    el.classList.add('active');
-    document.getElementById('nLb').classList.remove('on');
-    document.getElementById('nLb').classList.add('on');
-    document.getElementById('nHome').classList.remove('on');
-    renderLB();
-  } else if (tab === 'info') {
-    const el = document.getElementById('infoScreen');
-    el.style.display = 'flex';
-    el.classList.add('active');
-    document.getElementById('nInfo').classList.add('on');
-    document.getElementById('nHome').classList.remove('on');
-  } else if (tab === 'prof') {
-    const el = document.getElementById('profScreen');
-    el.style.display = 'flex';
-    el.classList.add('active');
-    document.getElementById('nProf').classList.add('on');
-    document.getElementById('nHome').classList.remove('on');
-    renderProf();
-  }
+  const ids = {home:'nHome',lb:'nLb',info:'nInfo',prof:'nProf'};
+  if(ids[tab]) document.getElementById(ids[tab]).classList.add('on');
+  // Load data
+  if (tab === 'lb') renderLB();
+  if (tab === 'prof') renderProf();
 };
 
 window.switchLB = cls => {
