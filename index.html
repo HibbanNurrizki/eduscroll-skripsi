@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>EduScroll</title>
+<title>NEODIK</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -184,7 +184,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 <!-- LOADING -->
 <div id="loadingScreen">
   <div class="spin"></div>
-  <div style="font-size:13px;color:var(--mut);">Memuat EduScroll...</div>
+  <div style="font-size:13px;color:var(--mut);">Memuat NEODIK...</div>
 </div>
 
 <!-- LOGIN -->
@@ -193,7 +193,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
   <div class="card">
     <div class="logo">
       <div class="lbox">📱</div>
-      <div class="lname">EduScroll</div>
+      <div class="lname">NEODIK</div>
       <div class="ltag">Belajar seru, swipe terus!</div>
     </div>
     <div class="rtabs">
@@ -250,7 +250,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
     <div class="pageInner">
       <div class="phdr">
         <div class="phtit">🏆 Papan Peringkat</div>
-        <div class="phsub">Siapa raja EduScroll minggu ini?</div>
+        <div class="phsub">Siapa raja NEODIK minggu ini?</div>
         <div class="lbts">
           <button class="lbtb ap" id="lbA" onclick="switchLB('6A')">6A — PAI</button>
           <button class="lbtb" id="lbB" onclick="switchLB('6B')">6B — PKN</button>
@@ -316,7 +316,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebas
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
-const cfg={apiKey:"AIzaSyABivTaZ_YIfjqFCdX1Ry3vfuHBjiIhjGQ",authDomain:"eduscroll-skripsi.firebaseapp.com",projectId:"eduscroll-skripsi",storageBucket:"eduscroll-skripsi.firebasestorage.app",messagingSenderId:"642802540998",appId:"1:642802540998:web:53c12f951411412209d2c7"};
+const cfg={apiKey:"AIzaSyABivTaZ_YIfjqFCdX1Ry3vfuHBjiIhjGQ",authDomain:"NEODIK-skripsi.firebaseapp.com",projectId:"NEODIK-skripsi",storageBucket:"NEODIK-skripsi.firebasestorage.app",messagingSenderId:"642802540998",appId:"1:642802540998:web:53c12f951411412209d2c7"};
 const app2=initializeApp(cfg);
 const auth=getAuth(app2);
 const db=getFirestore(app2);
@@ -541,7 +541,7 @@ function buildInfo(){
     </div>
     <div class="icard">
       <div class="icard-title">🎯 Tujuan Pembelajaran (TP)</div>
-      <div class="icard-body">Melalui aplikasi <b>EduScroll</b>, Peserta Didik dapat ${isPAI
+      <div class="icard-body">Melalui aplikasi <b>NEODIK</b>, Peserta Didik dapat ${isPAI
         ?'<b>memahami dan menerapkan adab komunikasi digital yang Islami</b>, mengidentifikasi perilaku jujur dan anti-hoaks, menjaga kehormatan diri (aurat digital), menghindari ghibah digital, serta bersikap amanah dalam menjaga data pribadi'
         :'<b>memahami dan menerapkan nilai-nilai toleransi keberagaman</b> berdasarkan Pancasila, mengenal keberagaman Indonesia, menghayati Bhinneka Tunggal Ika, menunjukkan toleransi antar umat beragama, serta berperan aktif menjaga persatuan dan kesatuan NKRI'
       } dengan baik.</div>
@@ -558,7 +558,7 @@ function buildInfo(){
     <div class="icard">
       <div class="icard-title">👨‍💻 Tim Pengembang</div>
       ${[['👨‍🎓','Hibban Nurrizki','Pengembang Aplikasi & Peneliti','#e94560'],['👩‍🎓','Ina Mutmainah','Pengembang Aplikasi & Peneliti','#e94560'],['👩‍🏫','Ocha Alyazazkia','Pengembang Materi PKN','#00d4aa'],['👩‍🏫','Sofia Sri Maharani Bundah','Pengembang Materi PKN','#00d4aa'],['👩‍🏫','Fitri Maryani','Pengembang Materi PAI','#f5a623']].map(t=>`<div class="team-card"><div class="team-av" style="background:linear-gradient(135deg,${t[3]},${t[3]}88)">${t[0]}</div><div><div class="team-name">${t[1]}</div><div class="team-role">${t[2]}</div></div></div>`).join('')}
-      <div style="text-align:center;font-size:11px;color:var(--mut);padding:10px 0 2px;">EduScroll v1.0 · Penelitian Skripsi 2026</div>
+      <div style="text-align:center;font-size:11px;color:var(--mut);padding:10px 0 2px;">NEODIK v1.0 · Penelitian Skripsi 2026</div>
     </div>`;
 }
 
@@ -566,7 +566,7 @@ function buildInfo(){
 function renderProf(){
   if(!CU)return;
   const done=(CU.completedVideos||[]).length,pts=CU.points||0;
-  const badges=[{icon:'🎬',name:'Video Pertama',lk:done<1},{icon:'📚',name:'Pelajar Rajin',lk:done<3},{icon:'🏆',name:'Juara Kuis',lk:pts<300},{icon:'🌟',name:'Bintang Kelas',lk:pts<600},{icon:'🔥',name:'On Fire',lk:done<10},{icon:'💎',name:'Siswa Teladan',lk:pts<1000},{icon:'🎓',name:'Lulus Materi',lk:done<videos.length},{icon:'👑',name:'Raja EduScroll',lk:pts<2000}];
+  const badges=[{icon:'🎬',name:'Video Pertama',lk:done<1},{icon:'📚',name:'Pelajar Rajin',lk:done<3},{icon:'🏆',name:'Juara Kuis',lk:pts<300},{icon:'🌟',name:'Bintang Kelas',lk:pts<600},{icon:'🔥',name:'On Fire',lk:done<10},{icon:'💎',name:'Siswa Teladan',lk:pts<1000},{icon:'🎓',name:'Lulus Materi',lk:done<videos.length},{icon:'👑',name:'Raja NEODIK',lk:pts<2000}];
   document.getElementById('profBody').innerHTML=
     `<div class="ph2"><div class="pav2">${CU.emoji||'😊'}</div><div class="pnm2">${CU.name}</div><div class="pkl2">Kelas ${CU.kelas} — ${CU.kelas==='6A'?'🕌 PAI Akhlak Digital':'🤝 PKN Toleransi Keberagaman'}</div></div>`
     +`<div class="sg"><div class="sc"><div class="sv">${pts}</div><div class="sl">Total Poin</div></div><div class="sc"><div class="sv">${done}</div><div class="sl">Video Selesai</div></div><div class="sc"><div class="sv">${videos.length}</div><div class="sl">Total Video</div></div></div>`
