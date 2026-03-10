@@ -316,7 +316,14 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebas
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
-const cfg={apiKey:"AIzaSyABivTaZ_YIfjqFCdX1Ry3vfuHBjiIhjGQ",authDomain:"NEODIK-skripsi.firebaseapp.com",projectId:"NEODIK-skripsi",storageBucket:"NEODIK-skripsi.firebasestorage.app",messagingSenderId:"642802540998",appId:"1:642802540998:web:53c12f951411412209d2c7"};
+const cfg={
+  apiKey:"AIzaSyABivTaZ_YIfjqFCdX1Ry3vfuHBjiIhjGQ",
+  authDomain:"eduscroll-skripsi.firebaseapp.com",
+  projectId:"eduscroll-skripsi",
+  storageBucket:"eduscroll-skripsi.firebasestorage.app",
+  messagingSenderId:"642802540998",
+  appId:"1:642802540998:web:53c12f951411412209d2c7"
+};
 const app2=initializeApp(cfg);
 const auth=getAuth(app2);
 const db=getFirestore(app2);
