@@ -353,7 +353,7 @@ onAuthStateChanged(auth,async user=>{
     CU={uid:user.uid,...ud.data()};
     if(CU.role==='guru'){window.location.href='guru.html';return;}
     videos=await loadVids(CU.kelas);
-    show('app');
+    idx=CU.lastVideoIdx||0;
     buildFeed();
     buildInfo();
     renderLB();
@@ -606,8 +606,8 @@ window.answerQ=async chosen=>{
     document.getElementById('rexp').textContent='💡 '+v.quiz.explanation;
     const done=CU.completedVideos||[];
     const newDone=done.includes(v.id)?done:[...done,v.id];
-    const newPts=(CU.points||0)+gained;
-    try{await updateDoc(doc(db,'users',CU.uid),{points:newPts,completedVideos:newDone});CU.points=newPts;CU.completedVideos=newDone;updateFeedUI();}catch(e){console.error(e);}
+    const alreadyDone=done.includes(v.id); const newDone=alreadyDone?done:[...done,v.id]; const newPts=(CU.points||0)+(alreadyDone?0:gained);
+    try{await updateDoc(doc(db,'users',CU.uid),{points:newPts,completedVideos:newDone,lastVideoIdx:idx});CU.points=newPts;CU.completedVideos=newDone;updateFeedUI();}catch(e){console.error(e);}
   },700);
 };
 window.closeQuiz=(next=false)=>{
